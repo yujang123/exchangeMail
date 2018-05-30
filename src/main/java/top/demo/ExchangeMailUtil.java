@@ -24,15 +24,25 @@ import java.util.Properties;
 
 public class ExchangeMailUtil {
 
-    private static final Properties properties;
+    private static final Properties PROPERTIES;
 
     static {
-        properties = new Properties();
+        PROPERTIES = new Properties();
+        InputStreamReader isr = null;
         try {
             // 设置编码,防止中文乱码
-            properties.load(new InputStreamReader(ExchangeMailUtil.class.getClassLoader().getResourceAsStream("config.properties"), "UTF-8"));
+            isr = new InputStreamReader(ExchangeMailUtil.class.getClassLoader().getResourceAsStream("config.properties"), "UTF-8");
+            PROPERTIES.load(isr);
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            if (isr != null) {
+                try {
+                    isr.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
@@ -42,7 +52,7 @@ public class ExchangeMailUtil {
         String userPwd;
         String folderName;
         String isRead = "";
-        if (args.length >= 4){
+        if (args.length >= 4) {
             userName = args[0];
             userPwd = args[1];
             folderName = args[2];
@@ -52,9 +62,18 @@ public class ExchangeMailUtil {
             userPwd = args[1];
             folderName = args[2];
         }
-        delEmail(userName,userPwd,folderName,isRead);
+        delEmail(userName, userPwd, folderName, isRead);
     }
 
+    /**
+     * 删除指定文件夹下的邮件
+     *
+     * @param userName   登录用户名
+     * @param userPwd    登陆密码
+     * @param folderName 指定文件夹
+     * @param isRead     邮件是否已读 false:未读邮件 true:已读邮件 不填:所有邮件
+     * @return 是否删除成功
+     */
     private static boolean delEmail(String userName, String userPwd, String folderName, String isRead) {
         boolean flag = false;
         // 从配置文件中获取参数
@@ -82,6 +101,7 @@ public class ExchangeMailUtil {
             // 搜索条件,邮件是否已读
             SearchFilter searchFilter = null;
             if (!exchangeIsRead.isEmpty()) {
+                System.out.println("-------进来-------");
                 searchFilter = new SearchFilter.IsEqualTo(EmailMessageSchema.IsRead, exchangeIsRead);
             }
             // 控制获取数
@@ -95,9 +115,11 @@ public class ExchangeMailUtil {
             for (Folder folder : folders.getFolders()) {
                 if (folder.getDisplayName().equals(exchangeFolderName)) {
                     if (searchFilter != null) { // 根据条件获取Item
+                        System.out.println("删除一部分");
                         items = folder.findItems(searchFilter, itemView);
                         break;
                     } else {    //获取所有Item
+                        System.out.println("删除所有");
                         items = folder.findItems(itemView);
                         break;
                     }
