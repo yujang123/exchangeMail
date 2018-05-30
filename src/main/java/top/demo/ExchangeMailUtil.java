@@ -81,8 +81,8 @@ public class ExchangeMailUtil {
         // String exchangePwd = properties.getProperty("exchange.pwd");
         String exchangeUser = userName;
         String exchangePwd = userPwd;
-        String exchangeDomain = properties.getProperty("exchange.domain");
-        String exchangeUrl = properties.getProperty("exchange.url");
+        String exchangeDomain = PROPERTIES.getProperty("exchange.domain");
+        String exchangeUrl = PROPERTIES.getProperty("exchange.url");
         // String exchangeFolderName = properties.getProperty("exchange.folder.name");
         // String exchangeIsRead = properties.getProperty("exchange.isRead");
         String exchangeFolderName = folderName;
