@@ -69,6 +69,8 @@ public class ExchangeMailUtil {
             } else {    //参数提供不足
                 System.out.println("缺少参数,请检查");
             }
+        } else {
+            System.out.println("没有提供参数");
         }
         // delEmail();
     }
@@ -84,15 +86,10 @@ public class ExchangeMailUtil {
      */
     private static boolean delEmail(String userName, String userPwd, String folderName, String isRead) {
         boolean flag = false;
-        // 从配置文件中获取参数
-        // String exchangeUser = properties.getProperty("exchange.user");
-        // String exchangePwd = properties.getProperty("exchange.pwd");
         String exchangeUser = userName;
         String exchangePwd = userPwd;
         String exchangeDomain = PROPERTIES.getProperty("exchange.domain");
         String exchangeUrl = PROPERTIES.getProperty("exchange.url");
-        // String exchangeFolderName = properties.getProperty("exchange.folder.name");
-        // String exchangeIsRead = properties.getProperty("exchange.isRead");
         String exchangeFolderName = folderName;
         String exchangeIsRead = isRead;
 
@@ -149,6 +146,8 @@ public class ExchangeMailUtil {
             e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            exchangeService.close();
         }
 
         return flag;
@@ -158,8 +157,6 @@ public class ExchangeMailUtil {
         // 从配置文件中获取参数
         String exchangeUser = PROPERTIES.getProperty("exchange.user");
         String exchangePwd = PROPERTIES.getProperty("exchange.pwd");
-        // String exchangeDomain = PROPERTIES.getProperty("exchange.domain");
-        // String exchangeUrl = PROPERTIES.getProperty("exchange.url");
         String exchangeFolderName = PROPERTIES.getProperty("exchange.folder.name");
         String exchangeIsRead = PROPERTIES.getProperty("exchange.isRead");
 
