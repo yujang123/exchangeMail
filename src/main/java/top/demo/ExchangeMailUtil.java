@@ -47,22 +47,30 @@ public class ExchangeMailUtil {
     }
 
     public static void main(String[] args) {
+        // 获取参数长度
+        int length = args.length;
         // 生成可执行jar后参数绑定
         String userName;
         String userPwd;
         String folderName;
         String isRead = "";
-        if (args.length >= 4) {
-            userName = args[0];
-            userPwd = args[1];
-            folderName = args[2];
-            isRead = args[3];
-        } else {
-            userName = args[0];
-            userPwd = args[1];
-            folderName = args[2];
+        if (length > 0) { // 参数具备才执行,避免无用功
+            if (length == 4) {  // 指定了搜索条件参数
+                userName = args[0];
+                userPwd = args[1];
+                folderName = args[2];
+                isRead = args[3];
+                delEmail(userName, userPwd, folderName, isRead);
+            } else if (length == 3) {   // 未指定搜索条件参数
+                userName = args[0];
+                userPwd = args[1];
+                folderName = args[2];
+                delEmail(userName, userPwd, folderName, isRead);
+            } else {    //参数提供不足
+                System.out.println("缺少参数,请检查");
+            }
         }
-        delEmail(userName, userPwd, folderName, isRead);
+        // delEmail();
     }
 
     /**
@@ -101,7 +109,6 @@ public class ExchangeMailUtil {
             // 搜索条件,邮件是否已读
             SearchFilter searchFilter = null;
             if (!exchangeIsRead.isEmpty()) {
-                System.out.println("-------进来-------");
                 searchFilter = new SearchFilter.IsEqualTo(EmailMessageSchema.IsRead, exchangeIsRead);
             }
             // 控制获取数
@@ -115,11 +122,9 @@ public class ExchangeMailUtil {
             for (Folder folder : folders.getFolders()) {
                 if (folder.getDisplayName().equals(exchangeFolderName)) {
                     if (searchFilter != null) { // 根据条件获取Item
-                        System.out.println("删除一部分");
                         items = folder.findItems(searchFilter, itemView);
                         break;
                     } else {    //获取所有Item
-                        System.out.println("删除所有");
                         items = folder.findItems(itemView);
                         break;
                     }
@@ -127,8 +132,16 @@ public class ExchangeMailUtil {
             }
 
             if (items != null && items.getTotalCount() > 0) {
-                for (Item item : items) {
-                    item.delete(DeleteMode.MoveToDeletedItems);
+                if (folderName.equals("已删除邮件")) {   // 真实删除
+                    for (Item item : items) {
+                        System.out.println("真实删除");
+                        item.delete(DeleteMode.HardDelete);
+                    }
+                } else {    // 伪删除,防止误删,移到已删除邮件中,还有机会确认一下
+                    for (Item item : items) {
+                        System.out.println("移至已删除邮件中");
+                        item.delete(DeleteMode.MoveToDeletedItems);
+                    }
                 }
                 flag = true;
             }
@@ -139,5 +152,17 @@ public class ExchangeMailUtil {
         }
 
         return flag;
+    }
+
+    private static boolean delEmail() {
+        // 从配置文件中获取参数
+        String exchangeUser = PROPERTIES.getProperty("exchange.user");
+        String exchangePwd = PROPERTIES.getProperty("exchange.pwd");
+        // String exchangeDomain = PROPERTIES.getProperty("exchange.domain");
+        // String exchangeUrl = PROPERTIES.getProperty("exchange.url");
+        String exchangeFolderName = PROPERTIES.getProperty("exchange.folder.name");
+        String exchangeIsRead = PROPERTIES.getProperty("exchange.isRead");
+
+        return delEmail(exchangeUser, exchangePwd, exchangeFolderName, exchangeIsRead);
     }
 }
